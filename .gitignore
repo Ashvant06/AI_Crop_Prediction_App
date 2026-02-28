@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+backend/.venv313/
+.pytest_cache/
+
+# Model and data artifacts
+backend/models/
+backend/data/raw/
+backend/data/processed/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Env files
+.env
+backend/.env
+frontend/.env
+
+# IDE
+.idea/
+.vscode/
