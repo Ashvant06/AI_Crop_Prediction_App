@@ -13,6 +13,12 @@ class AuthError(Exception):
     pass
 
 
+def _configured_google_client_ids() -> list[str]:
+    settings = get_settings()
+    values = settings.google_client_id_list
+    return [value for value in values if value and "your_google_oauth_client_id" not in value]
+
+
 async def _upsert_user(
     *,
     identity_key: str,
@@ -53,25 +59,30 @@ async def _upsert_user(
 
 
 def verify_google_credential(credential: str) -> dict:
-    settings = get_settings()
-    if not settings.google_client_id or "your_google_oauth_client_id" in settings.google_client_id:
-        raise AuthError("GOOGLE_CLIENT_ID is not configured in backend/.env")
+    configured_ids = _configured_google_client_ids()
+    if not configured_ids:
+        raise AuthError("Google OAuth is not configured. Set GOOGLE_CLIENT_ID or GOOGLE_CLIENT_IDS.")
     request = google_requests.Request()
 
     try:
-        token_info = id_token.verify_oauth2_token(
-            credential,
-            request,
-            audience=settings.google_client_id or None,
-        )
+        # Verify signature and standard claims first, then validate audience manually.
+        token_info = id_token.verify_oauth2_token(credential, request, audience=None)
     except ValueError as exc:
         raise AuthError("Google credential verification failed") from exc
 
     if token_info.get("iss") not in {"accounts.google.com", "https://accounts.google.com"}:
         raise AuthError("Invalid Google token issuer")
 
-    if settings.google_client_id and token_info.get("aud") != settings.google_client_id:
+    token_aud = str(token_info.get("aud", "")).strip()
+    token_azp = str(token_info.get("azp", "")).strip()
+    if token_aud not in configured_ids and token_azp not in configured_ids:
         raise AuthError("Google token audience does not match configured client id")
+
+    if token_info.get("email_verified") is not True:
+        raise AuthError("Google account email is not verified")
+
+    if not token_info.get("sub"):
+        raise AuthError("Google token is missing subject")
 
     return token_info
 

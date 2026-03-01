@@ -165,6 +165,9 @@ If your CSV columns differ, update:
 - `backend/.env` as `GOOGLE_CLIENT_ID`
 - `frontend/.env` as `VITE_GOOGLE_CLIENT_ID`
 
+If you use multiple Google OAuth web clients, add all backend-accepted IDs in:
+- `GOOGLE_CLIENT_IDS=id1.apps.googleusercontent.com,id2.apps.googleusercontent.com`
+
 ## 6.1 Demo Login (No Google Setup Required)
 
 If you have not configured Google OAuth yet, use **Continue in Demo Mode** on login page.
