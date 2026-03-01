@@ -15,6 +15,8 @@ class Settings(BaseSettings):
 
     mongo_uri: str = Field(default="mongodb://localhost:27017", alias="MONGO_URI")
     mongo_db_name: str = Field(default="crop_yield_ai", alias="MONGO_DB_NAME")
+    local_db_fallback: bool = Field(default=True, alias="LOCAL_DB_FALLBACK")
+    local_db_path: str = Field(default="backend/data/local_store.json", alias="LOCAL_DB_PATH")
 
     google_client_id: str = Field(default="", alias="GOOGLE_CLIENT_ID")
     allow_dev_auth: bool = Field(default=True, alias="ALLOW_DEV_AUTH")

@@ -10,6 +10,7 @@ backend/.venv313/
 backend/models/
 backend/data/raw/
 backend/data/processed/
+backend/data/local_store.json
 
 # Frontend
 frontend/node_modules/

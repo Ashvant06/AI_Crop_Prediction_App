@@ -94,6 +94,10 @@ Run local MongoDB on default port:
 
 Or update `MONGO_URI` in `backend/.env`.
 
+If MongoDB is unavailable, backend can auto-fallback to a local JSON store:
+- `LOCAL_DB_FALLBACK=true`
+- `LOCAL_DB_PATH=backend/data/local_store.json`
+
 ## 4. Datasets (Real-World CSV)
 
 ### Auto download

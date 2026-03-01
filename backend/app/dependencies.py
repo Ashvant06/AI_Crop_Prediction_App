@@ -24,10 +24,21 @@ async def get_current_user(
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject")
 
+    database = get_database()
+    user = None
+    lookup_candidates: list[object] = [user_id]
+
     try:
-        database = get_database()
-        user = await database.users.find_one({"_id": ObjectId(user_id)})
-    except (ValueError, PyMongoError):
+        lookup_candidates.insert(0, ObjectId(user_id))
+    except Exception:
+        pass
+
+    try:
+        for candidate in lookup_candidates:
+            user = await database.users.find_one({"_id": candidate})
+            if user is not None:
+                break
+    except PyMongoError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User lookup failed")
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc

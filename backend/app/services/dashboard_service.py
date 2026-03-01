@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from app.schemas import ActivityItem, DashboardCharts, DashboardSummary
 
 ACRE_PER_HECTARE = 2.47105
 QUINTAL_PER_TON = 10.0
 LEGACY_TON_HECTARE_THRESHOLD = 100.0
+MAX_DASHBOARD_ROWS = 5000
 
 
 def normalize_ton_hectare(value: float | int | None) -> float:
@@ -16,21 +19,26 @@ def normalize_ton_hectare(value: float | int | None) -> float:
 
 
 async def fetch_dashboard_summary(database, user_id: str) -> DashboardSummary:
-    total_predictions = await database.predictions.count_documents({"user_id": user_id})
-    total_recommendations = await database.recommendations.count_documents({"user_id": user_id})
-    total_surveys = await database.surveys.count_documents({"user_id": user_id})
-    latest = await database.predictions.find({"user_id": user_id}).sort("created_at", -1).limit(1).to_list(1)
+    predictions = (
+        await database.predictions.find({"user_id": user_id})
+        .sort("created_at", -1)
+        .to_list(length=MAX_DASHBOARD_ROWS)
+    )
+    recommendations = await database.recommendations.find({"user_id": user_id}).to_list(length=MAX_DASHBOARD_ROWS)
+    surveys = await database.surveys.find({"user_id": user_id}).to_list(length=MAX_DASHBOARD_ROWS)
 
-    latest_ton_hectare = normalize_ton_hectare(latest[0].get("predicted_yield_ton_hectare")) if latest else None
+    latest_ton_hectare = (
+        normalize_ton_hectare(predictions[0].get("predicted_yield_ton_hectare")) if predictions else None
+    )
     latest_quintal_hectare = (latest_ton_hectare * QUINTAL_PER_TON) if latest_ton_hectare is not None else None
     latest_quintal_acre = (
         (latest_quintal_hectare / ACRE_PER_HECTARE) if latest_quintal_hectare is not None else None
     )
 
     return DashboardSummary(
-        total_predictions=total_predictions,
-        total_recommendations=total_recommendations,
-        total_surveys=total_surveys,
+        total_predictions=len(predictions),
+        total_recommendations=len(recommendations),
+        total_surveys=len(surveys),
         latest_prediction=round(latest_ton_hectare, 3) if latest_ton_hectare is not None else None,
         latest_yield_quintal_hectare=(
             round(latest_quintal_hectare, 3) if latest_quintal_hectare is not None else None
@@ -40,68 +48,69 @@ async def fetch_dashboard_summary(database, user_id: str) -> DashboardSummary:
 
 
 async def fetch_dashboard_charts(database, user_id: str) -> DashboardCharts:
-    monthly_prediction_pipeline = [
-        {"$match": {"user_id": user_id}},
-        {
-            "$addFields": {
-                "normalized_yield_ton_hectare": {
-                    "$cond": [
-                        {"$gt": ["$predicted_yield_ton_hectare", LEGACY_TON_HECTARE_THRESHOLD]},
-                        {"$divide": ["$predicted_yield_ton_hectare", 10000]},
-                        "$predicted_yield_ton_hectare",
-                    ]
-                }
+    predictions = await database.predictions.find({"user_id": user_id}).to_list(length=MAX_DASHBOARD_ROWS)
+    surveys = await database.surveys.find({"user_id": user_id}).to_list(length=MAX_DASHBOARD_ROWS)
+
+    monthly_data: dict[str, dict[str, float]] = {}
+    crop_data: dict[str, int] = {}
+    survey_data: dict[str, dict[str, float]] = {}
+
+    for row in predictions:
+        created_at = row.get("created_at")
+        if not isinstance(created_at, datetime):
+            continue
+        month = created_at.strftime("%Y-%m")
+        normalized_yield = normalize_ton_hectare(row.get("predicted_yield_ton_hectare"))
+        bucket = monthly_data.setdefault(month, {"yield_sum": 0.0, "count": 0.0})
+        bucket["yield_sum"] += normalized_yield
+        bucket["count"] += 1.0
+
+        crop = str(row.get("input", {}).get("crop") or "unknown")
+        crop_data[crop] = crop_data.get(crop, 0) + 1
+
+    for row in surveys:
+        created_at = row.get("created_at")
+        if not isinstance(created_at, datetime):
+            continue
+        month = created_at.strftime("%Y-%m")
+        score = float(row.get("satisfaction_score") or 0.0)
+        bucket = survey_data.setdefault(month, {"score_sum": 0.0, "count": 0.0})
+        bucket["score_sum"] += score
+        bucket["count"] += 1.0
+
+    monthly_predictions = []
+    for month in sorted(monthly_data.keys()):
+        count = int(monthly_data[month]["count"])
+        if count == 0:
+            continue
+        avg_yield = monthly_data[month]["yield_sum"] / count
+        monthly_predictions.append(
+            {
+                "month": month,
+                "avg_yield": round(avg_yield, 3),
+                "avg_yield_quintal_hectare": round(avg_yield * QUINTAL_PER_TON, 3),
+                "avg_yield_quintal_acre": round((avg_yield * QUINTAL_PER_TON) / ACRE_PER_HECTARE, 3),
+                "predictions": count,
             }
-        },
-        {
-            "$group": {
-                "_id": {"$dateToString": {"format": "%Y-%m", "date": "$created_at"}},
-                "avg_yield": {"$avg": "$normalized_yield_ton_hectare"},
-                "predictions": {"$sum": 1},
-            }
-        },
-        {"$sort": {"_id": 1}},
-    ]
-    crop_distribution_pipeline = [
-        {"$match": {"user_id": user_id}},
-        {"$group": {"_id": "$input.crop", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}},
-        {"$limit": 8},
-    ]
-    survey_trend_pipeline = [
-        {"$match": {"user_id": user_id}},
-        {
-            "$group": {
-                "_id": {"$dateToString": {"format": "%Y-%m", "date": "$created_at"}},
-                "avg_satisfaction": {"$avg": "$satisfaction_score"},
-            }
-        },
-        {"$sort": {"_id": 1}},
+        )
+
+    crop_distribution = [
+        {"crop": crop, "count": count}
+        for crop, count in sorted(crop_data.items(), key=lambda item: item[1], reverse=True)[:8]
     ]
 
-    monthly_rows = await database.predictions.aggregate(monthly_prediction_pipeline).to_list(length=24)
-    crop_rows = await database.predictions.aggregate(crop_distribution_pipeline).to_list(length=8)
-    survey_rows = await database.surveys.aggregate(survey_trend_pipeline).to_list(length=24)
+    survey_trend = []
+    for month in sorted(survey_data.keys()):
+        count = int(survey_data[month]["count"])
+        if count == 0:
+            continue
+        average = survey_data[month]["score_sum"] / count
+        survey_trend.append({"month": month, "avg_satisfaction": round(average, 3)})
 
     return DashboardCharts(
-        monthly_predictions=[
-            {
-                "month": row["_id"],
-                "avg_yield": round(row["avg_yield"], 3),
-                "avg_yield_quintal_hectare": round(row["avg_yield"] * QUINTAL_PER_TON, 3),
-                "avg_yield_quintal_acre": round((row["avg_yield"] * QUINTAL_PER_TON) / ACRE_PER_HECTARE, 3),
-                "predictions": row["predictions"],
-            }
-            for row in monthly_rows
-        ],
-        crop_distribution=[
-            {"crop": row["_id"] or "unknown", "count": row["count"]}
-            for row in crop_rows
-        ],
-        survey_trend=[
-            {"month": row["_id"], "avg_satisfaction": round(row["avg_satisfaction"], 3)}
-            for row in survey_rows
-        ],
+        monthly_predictions=monthly_predictions,
+        crop_distribution=crop_distribution,
+        survey_trend=survey_trend,
     )
 
 
