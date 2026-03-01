@@ -38,12 +38,18 @@ class Settings(BaseSettings):
     cors_origins: str = Field(
         default="http://localhost:5173,http://127.0.0.1:5173", alias="CORS_ORIGINS"
     )
+    cors_origin_regex: str = Field(default=r"^https://.*\.onrender\.com$", alias="CORS_ORIGIN_REGEX")
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def cors_origin_regex_value(self) -> str | None:
+        value = self.cors_origin_regex.strip()
+        return value or None
 
     @property
     def knowledge_base_path_list(self) -> list[str]:

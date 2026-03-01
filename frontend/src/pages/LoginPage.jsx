@@ -1,12 +1,25 @@
+import { useState } from "react";
 import { Navigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 
 function LoginPage() {
+  const [clientAuthError, setClientAuthError] = useState("");
   const { isAuthenticated, authLoading, authError, loginWithGoogleCredential, loginAsDemo } = useAuth();
   const { t } = useLanguage();
-  const rawClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+  const normalizeEnvValue = (value) => {
+    const normalized = String(value || "").trim();
+    if (normalized.length >= 2) {
+      const hasSingleQuotes = normalized.startsWith("'") && normalized.endsWith("'");
+      const hasDoubleQuotes = normalized.startsWith('"') && normalized.endsWith('"');
+      if (hasSingleQuotes || hasDoubleQuotes) {
+        return normalized.slice(1, -1).trim();
+      }
+    }
+    return normalized;
+  };
+  const rawClientId = normalizeEnvValue(import.meta.env.VITE_GOOGLE_CLIENT_ID);
   const hasClientId =
     Boolean(rawClientId) &&
     !rawClientId.includes("your_google_oauth_client_id") &&
@@ -25,11 +38,17 @@ function LoginPage() {
         {hasClientId ? (
           <>
             <GoogleLogin
-              onSuccess={(credentialResponse) =>
-                credentialResponse.credential ? loginWithGoogleCredential(credentialResponse.credential) : Promise.resolve(false)
-              }
+              onSuccess={async (credentialResponse) => {
+                setClientAuthError("");
+                const credential = credentialResponse?.credential;
+                if (!credential) {
+                  setClientAuthError("Google sign-in did not return a valid credential. Please try again.");
+                  return;
+                }
+                await loginWithGoogleCredential(credential);
+              }}
               onError={() => {
-                // keep lightweight client-side error handling
+                setClientAuthError("Google sign-in popup failed. Allow popups and try again.");
               }}
               text="signin_with"
               size="large"
@@ -53,6 +72,7 @@ function LoginPage() {
         )}
         {authLoading ? <p className="status-line">{t("authenticating")}</p> : null}
         {authError ? <p className="error-line">{authError}</p> : null}
+        {clientAuthError ? <p className="error-line">{clientAuthError}</p> : null}
       </section>
     </main>
   );

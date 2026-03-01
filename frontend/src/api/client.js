@@ -1,6 +1,18 @@
 import axios from "axios";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const normalizeEnvValue = (value) => {
+  const normalized = String(value || "").trim();
+  if (normalized.length >= 2) {
+    const hasSingleQuotes = normalized.startsWith("'") && normalized.endsWith("'");
+    const hasDoubleQuotes = normalized.startsWith('"') && normalized.endsWith('"');
+    if (hasSingleQuotes || hasDoubleQuotes) {
+      return normalized.slice(1, -1).trim();
+    }
+  }
+  return normalized;
+};
+
+export const API_BASE_URL = normalizeEnvValue(import.meta.env.VITE_API_BASE_URL) || "http://localhost:8000";
 const TOKEN_KEY = "crop_ai_token";
 
 const apiClient = axios.create({

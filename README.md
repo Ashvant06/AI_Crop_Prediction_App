@@ -175,6 +175,26 @@ If you have not configured Google OAuth yet, use **Continue in Demo Mode** on lo
 - Backend dev auth endpoint: `POST /auth/dev`
 - Controlled by `ALLOW_DEV_AUTH=true` in `backend/.env`
 
+## 6.2 Render OAuth Troubleshooting
+
+If Google login keeps returning to the login page:
+
+1. Frontend env (`frontend/.env` or Render Static Site env):
+- `VITE_API_BASE_URL=https://<your-backend-service>.onrender.com`
+- `VITE_GOOGLE_CLIENT_ID=<web_client_id>.apps.googleusercontent.com`
+- Do not wrap values in quotes.
+
+2. Backend env (Render Web Service env):
+- `GOOGLE_CLIENT_ID=<same web_client_id>`
+- Optional: `GOOGLE_CLIENT_IDS=<comma-separated list of accepted web client ids>`
+- `CORS_ORIGINS=https://<your-frontend-site>.onrender.com,http://localhost:5173`
+- `CORS_ORIGIN_REGEX=^https://.*\\.onrender\\.com$`
+
+3. Google Cloud Console OAuth client:
+- Authorized JavaScript origins must include your frontend URL, for example `https://<your-frontend-site>.onrender.com`.
+
+4. After changing env vars in Render, redeploy both backend and frontend services.
+
 ## 7. Features Included
 
 - Google login and JWT session

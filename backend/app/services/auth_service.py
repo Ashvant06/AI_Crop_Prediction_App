@@ -13,9 +13,16 @@ class AuthError(Exception):
     pass
 
 
+def _normalize_client_id(value: str) -> str:
+    normalized = str(value or "").strip()
+    if normalized.startswith(("'", '"')) and normalized.endswith(("'", '"')) and len(normalized) >= 2:
+        normalized = normalized[1:-1].strip()
+    return normalized
+
+
 def _configured_google_client_ids() -> list[str]:
     settings = get_settings()
-    values = settings.google_client_id_list
+    values = [_normalize_client_id(item) for item in settings.google_client_id_list]
     return [value for value in values if value and "your_google_oauth_client_id" not in value]
 
 

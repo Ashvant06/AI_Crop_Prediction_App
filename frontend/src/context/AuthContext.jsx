@@ -1,8 +1,43 @@
 import { createContext, useContext, useMemo, useState } from "react";
-import { authApi, clearAccessToken, setAccessToken } from "../api/client";
+import { API_BASE_URL, authApi, clearAccessToken, setAccessToken } from "../api/client";
 
 const USER_KEY = "crop_ai_user";
 const AuthContext = createContext(null);
+
+const extractErrorDetail = (error, fallbackMessage) => {
+  const detail = error?.response?.data?.detail;
+  if (typeof detail === "string" && detail.trim()) {
+    return detail;
+  }
+  if (Array.isArray(detail) && detail.length > 0) {
+    return detail
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object" && typeof item.msg === "string") return item.msg;
+        try {
+          return JSON.stringify(item);
+        } catch {
+          return "";
+        }
+      })
+      .filter(Boolean)
+      .join("; ");
+  }
+  if (detail && typeof detail === "object") {
+    if (typeof detail.message === "string" && detail.message.trim()) {
+      return detail.message;
+    }
+    try {
+      return JSON.stringify(detail);
+    } catch {
+      return fallbackMessage;
+    }
+  }
+  if (error?.message === "Network Error") {
+    return `Cannot reach backend API at ${API_BASE_URL}. Check VITE_API_BASE_URL and backend CORS settings.`;
+  }
+  return fallbackMessage;
+};
 
 const getStoredUser = () => {
   const raw = localStorage.getItem(USER_KEY);
@@ -30,7 +65,7 @@ export function AuthProvider({ children }) {
       setUser(userProfile);
       return true;
     } catch (error) {
-      const detail = error?.response?.data?.detail || "Google sign-in failed.";
+      const detail = extractErrorDetail(error, "Google sign-in failed.");
       setAuthError(detail);
       return false;
     } finally {
@@ -52,7 +87,7 @@ export function AuthProvider({ children }) {
       setUser(userProfile);
       return true;
     } catch (error) {
-      const detail = error?.response?.data?.detail || "Demo sign-in failed.";
+      const detail = extractErrorDetail(error, "Demo sign-in failed.");
       setAuthError(detail);
       return false;
     } finally {
