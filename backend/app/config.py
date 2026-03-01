@@ -23,6 +23,8 @@ class Settings(BaseSettings):
 
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
     openai_model: str = Field(default="gpt-4o-mini", alias="OPENAI_MODEL")
+    gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
+    gemini_model: str = Field(default="gemini-1.5-flash", alias="GEMINI_MODEL")
 
     model_artifact_path: str = Field(
         default="backend/models/crop_yield_model.joblib", alias="MODEL_ARTIFACT_PATH"

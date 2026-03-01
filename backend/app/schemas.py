@@ -43,6 +43,9 @@ class AgroInputBase(BaseModel):
     pesticides_tonnes: float | None = None
     previous_yield_ton_hectare: float | None = None
     ndvi: float | None = None
+    user_latitude: float | None = None
+    user_longitude: float | None = None
+    user_locality: str | None = Field(default=None, max_length=120)
 
     def feature_dict(self) -> dict[str, float | str | int]:
         values = self.model_dump()
@@ -88,6 +91,9 @@ class SurveyRequest(BaseModel):
     risk_appetite: str | None = None
     satisfaction_score: int = Field(ge=1, le=5)
     notes: str | None = Field(default=None, max_length=2000)
+    user_latitude: float | None = None
+    user_longitude: float | None = None
+    user_locality: str | None = Field(default=None, max_length=120)
 
 
 class ChatHistoryMessage(BaseModel):

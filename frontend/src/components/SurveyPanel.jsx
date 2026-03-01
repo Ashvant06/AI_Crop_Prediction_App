@@ -1,26 +1,35 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 const initialSurvey = {
   preferred_crops: [],
   irrigation_method: "drip",
   risk_appetite: "medium",
   satisfaction_score: 4,
-  notes: ""
+  notes: "",
 };
 
-const cropOptions = ["rice", "wheat", "maize", "soybean", "cotton", "sugarcane"];
+const cropOptions = ["rice", "maize", "groundnut", "cotton", "sugarcane", "millets"];
 
-function SurveyPanel({ onSubmit, loading }) {
+function SurveyPanel({ onSubmit, loading, regionLabel }) {
   const [survey, setSurvey] = useState(initialSurvey);
+
+  const regionalHint = useMemo(() => {
+    const lower = String(regionLabel || "").toLowerCase();
+    if (lower.includes("coimbatore") || lower.includes("erode")) {
+      return "Suggested region topics: water-saving irrigation, cotton pest alerts, maize storage.";
+    }
+    if (lower.includes("thanjavur") || lower.includes("nagapattinam")) {
+      return "Suggested region topics: paddy scheduling, canal irrigation planning, harvest timing.";
+    }
+    return "Suggested region topics: rainfall variability, fertilizer timing, and market linkage.";
+  }, [regionLabel]);
 
   const toggleCrop = (crop) => {
     setSurvey((prev) => {
       const hasCrop = prev.preferred_crops.includes(crop);
       return {
         ...prev,
-        preferred_crops: hasCrop
-          ? prev.preferred_crops.filter((item) => item !== crop)
-          : [...prev.preferred_crops, crop]
+        preferred_crops: hasCrop ? prev.preferred_crops.filter((item) => item !== crop) : [...prev.preferred_crops, crop],
       };
     });
   };
@@ -34,8 +43,9 @@ function SurveyPanel({ onSubmit, loading }) {
     <section className="card">
       <div className="card-head">
         <h3>Farmer Survey</h3>
-        <p>Track preferences and planning confidence</p>
+        <p>Region: {regionLabel || "Tamil Nadu"}</p>
       </div>
+      <p className="muted">{regionalHint}</p>
       <form onSubmit={handleSubmit} className="survey-form">
         <div className="chip-wrap">
           {cropOptions.map((crop) => (
@@ -79,9 +89,7 @@ function SurveyPanel({ onSubmit, loading }) {
             min={1}
             max={5}
             value={survey.satisfaction_score}
-            onChange={(event) =>
-              setSurvey((prev) => ({ ...prev, satisfaction_score: Number(event.target.value) }))
-            }
+            onChange={(event) => setSurvey((prev) => ({ ...prev, satisfaction_score: Number(event.target.value) }))}
           />
           <small>{survey.satisfaction_score}/5</small>
         </label>
@@ -91,7 +99,7 @@ function SurveyPanel({ onSubmit, loading }) {
             value={survey.notes}
             onChange={(event) => setSurvey((prev) => ({ ...prev, notes: event.target.value }))}
             rows={4}
-            placeholder="Any local challenge or objective for the next season..."
+            placeholder="Local crop challenge, pest issue, or irrigation concern..."
           />
         </label>
         <button type="submit" className="primary-btn" disabled={loading}>

@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-from openai import AsyncOpenAI
+import httpx
 
 from app.config import get_settings
 from app.schemas import ChatHistoryMessage, PredictionRequest, RecommendationRequest, SurveyRequest
@@ -20,12 +20,11 @@ from app.services.model_service import model_service
 
 ACRE_PER_HECTARE = 2.47105
 QUINTAL_PER_TON = 10.0
-MAX_TOOL_STEPS = 5
 
 DEFAULT_PREDICTION_INPUT: dict[str, Any] = {
     "crop": "rice",
-    "state": "karnataka",
-    "district": "mysuru",
+    "state": "tamil nadu",
+    "district": "thanjavur",
     "year": 2026,
     "area_hectares": 1.0,
     "rainfall_mm": 900.0,
@@ -63,6 +62,7 @@ STATE_KEYWORDS = [
     "rajasthan",
     "sikkim",
     "tamil nadu",
+    "tamilnadu",
     "telangana",
     "tripura",
     "uttar pradesh",
@@ -80,124 +80,13 @@ class ChatAgentResult:
 
 def _assistant_prompt(user_name: str) -> str:
     return (
-        "You are AgroAI Copilot for an Indian farming app. "
+        "You are AgroAI Copilot for Tamil Nadu farmers. "
         f"Current user: {user_name}. "
-        "You can execute app tools for predictions, recommendations, surveys, dashboards, and activities. "
-        "When data is requested, call tools instead of guessing. "
-        "For prediction/recommendation tools, if the user misses fields, use practical defaults and explain assumptions. "
-        "Use India-friendly units in replies: q/acre, q/ha, acres, quintals. "
-        "Keep responses practical, concise, and action-oriented."
+        "Keep language simple, practical, and respectful. "
+        "Focus on Tamil Nadu crop, weather, irrigation, and regional farming conditions. "
+        "Use India-friendly units: q/acre, q/ha, acres, quintals. "
+        "If the user writes in Tamil, answer in Tamil. Otherwise answer in English."
     )
-
-
-def _tool_schemas() -> list[dict[str, Any]]:
-    prediction_properties = {
-        "crop": {"type": "string"},
-        "state": {"type": "string"},
-        "district": {"type": "string"},
-        "year": {"type": "integer"},
-        "area_hectares": {"type": "number"},
-        "rainfall_mm": {"type": "number"},
-        "temperature_c": {"type": "number"},
-        "humidity_pct": {"type": "number"},
-        "nitrogen": {"type": "number"},
-        "phosphorus": {"type": "number"},
-        "potassium": {"type": "number"},
-        "soil_ph": {"type": "number"},
-        "pesticides_tonnes": {"type": "number"},
-        "previous_yield_ton_hectare": {"type": "number"},
-    }
-    return [
-        {
-            "type": "function",
-            "function": {
-                "name": "predict_yield",
-                "description": "Run crop yield prediction and save it in user account.",
-                "parameters": {"type": "object", "properties": prediction_properties},
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "recommend_crops",
-                "description": "Recommend top crops based on conditions and save recommendation.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        **prediction_properties,
-                        "top_n": {"type": "integer"},
-                    },
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "submit_survey",
-                "description": "Submit a farmer survey response for the current user.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "preferred_crops": {"type": "array", "items": {"type": "string"}},
-                        "irrigation_method": {"type": "string"},
-                        "risk_appetite": {"type": "string"},
-                        "satisfaction_score": {"type": "integer"},
-                        "notes": {"type": "string"},
-                    },
-                    "required": ["satisfaction_score"],
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_dashboard_summary",
-                "description": "Get user dashboard summary metrics.",
-                "parameters": {"type": "object", "properties": {}},
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_dashboard_charts",
-                "description": "Get chart-ready analytics data for monthly yields and trends.",
-                "parameters": {"type": "object", "properties": {}},
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_recent_activities",
-                "description": "Get recent user activities from app history.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {"limit": {"type": "integer"}},
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_recent_predictions",
-                "description": "Fetch recent saved prediction results.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {"limit": {"type": "integer"}},
-                },
-            },
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "get_recent_recommendations",
-                "description": "Fetch recent saved crop recommendation results.",
-                "parameters": {
-                    "type": "object",
-                    "properties": {"limit": {"type": "integer"}},
-                },
-            },
-        },
-    ]
 
 
 def _normalize_limit(limit_value: Any, default: int = 10) -> int:
@@ -306,6 +195,9 @@ async def _tool_submit_survey(database, user: dict, arguments: dict[str, Any]) -
         "risk_appetite": arguments.get("risk_appetite"),
         "satisfaction_score": arguments.get("satisfaction_score", 4),
         "notes": arguments.get("notes"),
+        "user_latitude": arguments.get("user_latitude"),
+        "user_longitude": arguments.get("user_longitude"),
+        "user_locality": arguments.get("user_locality"),
     }
     payload = SurveyRequest(**payload_data)
     now = datetime.now(UTC)
@@ -430,14 +322,6 @@ async def _execute_tool(
     raise ValueError(f"Unsupported tool: {tool_name}")
 
 
-def _build_messages(user: dict, message: str, history: list[ChatHistoryMessage]) -> list[dict[str, Any]]:
-    messages: list[dict[str, Any]] = [{"role": "system", "content": _assistant_prompt(user.get("name", "Farmer"))}]
-    for turn in history[-10:]:
-        messages.append({"role": turn.role, "content": turn.content})
-    messages.append({"role": "user", "content": message})
-    return messages
-
-
 def _safe_json_loads(payload: str) -> dict[str, Any]:
     try:
         parsed = json.loads(payload or "{}")
@@ -448,7 +332,7 @@ def _safe_json_loads(payload: str) -> dict[str, Any]:
 
 def _command_mode_help() -> str:
     return (
-        "Generative mode is unavailable (OPENAI_API_KEY missing), but you can still use app actions via commands:\n"
+        "Use app actions via commands:\n"
         "/predict {json}\n"
         "/recommend {json}\n"
         "/survey {json}\n"
@@ -550,9 +434,8 @@ async def _command_mode_response(
             )
         return ChatAgentResult(
             reply=(
-                "I can operate all app features for you. Ask naturally like "
-                "\"show dashboard summary\", \"predict wheat in punjab\", \"recommend crops\", "
-                "\"show my activities\", or use /help for command format."
+                "I can run app actions for you. Ask: show dashboard summary, predict yield, "
+                "recommend crops, show activities, or use /help for command format."
             ),
             used_tools=[],
             tool_summaries=[],
@@ -579,7 +462,51 @@ async def _command_mode_response(
     arguments = _safe_json_loads(arg_text.strip())
     result = await _execute_tool(database, user, tool_name, arguments, context)
     summary = _tool_summary(tool_name, result)
-    return ChatAgentResult(reply=f"{summary}\n\nData: {json.dumps(result, default=str)}", used_tools=[tool_name], tool_summaries=[summary])
+    return ChatAgentResult(
+        reply=f"{summary}\n\nData: {json.dumps(result, default=str)}",
+        used_tools=[tool_name],
+        tool_summaries=[summary],
+    )
+
+
+async def _gemini_chat_reply(
+    *,
+    api_key: str,
+    model: str,
+    user: dict,
+    message: str,
+    history: list[ChatHistoryMessage],
+) -> str | None:
+    contents: list[dict[str, Any]] = []
+    for turn in history[-6:]:
+        role = "model" if turn.role == "assistant" else "user"
+        contents.append({"role": role, "parts": [{"text": turn.content}]})
+    contents.append({"role": "user", "parts": [{"text": message}]})
+
+    payload = {
+        "systemInstruction": {"parts": [{"text": _assistant_prompt(user.get("name", "Farmer"))}]},
+        "contents": contents,
+        "generationConfig": {"temperature": 0.4, "maxOutputTokens": 500},
+    }
+    url = (
+        f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        f"?key={api_key}"
+    )
+
+    try:
+        async with httpx.AsyncClient(timeout=25.0) as client:
+            response = await client.post(url, json=payload)
+            response.raise_for_status()
+        data = response.json()
+        candidates = data.get("candidates") or []
+        if not candidates:
+            return None
+        parts = (candidates[0].get("content") or {}).get("parts") or []
+        text_parts = [part.get("text", "") for part in parts if isinstance(part, dict)]
+        reply = "\n".join([part.strip() for part in text_parts if part.strip()])
+        return reply or None
+    except Exception:
+        return None
 
 
 async def get_chat_reply(
@@ -593,78 +520,21 @@ async def get_chat_reply(
     settings = get_settings()
     turns = history or []
     context_data = context or {}
+    trimmed = message.strip()
 
-    if not settings.openai_api_key:
+    inferred = None if trimmed.startswith("/") else _infer_tool_from_text(trimmed)
+    if trimmed.startswith("/") or inferred is not None:
         return await _command_mode_response(database, user, message, context_data)
 
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
-    messages = _build_messages(user, message, turns)
-    used_tools: list[str] = []
-    tool_summaries: list[str] = []
-    tools = _tool_schemas()
+    if settings.gemini_api_key:
+        gemini_reply = await _gemini_chat_reply(
+            api_key=settings.gemini_api_key,
+            model=settings.gemini_model,
+            user=user,
+            message=message,
+            history=turns,
+        )
+        if gemini_reply:
+            return ChatAgentResult(reply=gemini_reply)
 
-    try:
-        for _ in range(MAX_TOOL_STEPS):
-            completion = await client.chat.completions.create(
-                model=settings.openai_model,
-                temperature=0.2,
-                messages=messages,
-                tools=tools,
-                tool_choice="auto",
-            )
-            assistant_message = completion.choices[0].message
-            tool_calls = assistant_message.tool_calls or []
-
-            if not tool_calls:
-                text = (assistant_message.content or "").strip()
-                if text:
-                    return ChatAgentResult(reply=text, used_tools=used_tools, tool_summaries=tool_summaries)
-                break
-
-            messages.append(
-                {
-                    "role": "assistant",
-                    "content": assistant_message.content or "",
-                    "tool_calls": [
-                        {
-                            "id": tool_call.id,
-                            "type": "function",
-                            "function": {
-                                "name": tool_call.function.name,
-                                "arguments": tool_call.function.arguments,
-                            },
-                        }
-                        for tool_call in tool_calls
-                    ],
-                }
-            )
-
-            for tool_call in tool_calls:
-                tool_name = tool_call.function.name
-                arguments = _safe_json_loads(tool_call.function.arguments)
-                try:
-                    result = await _execute_tool(database, user, tool_name, arguments, context_data)
-                    summary = _tool_summary(tool_name, result)
-                except Exception as exc:
-                    result = {"error": str(exc)}
-                    summary = f"{tool_name} failed: {exc}"
-
-                used_tools.append(tool_name)
-                tool_summaries.append(summary)
-                messages.append(
-                    {
-                        "role": "tool",
-                        "tool_call_id": tool_call.id,
-                        "content": json.dumps(result, default=str),
-                    }
-                )
-
-        if tool_summaries:
-            return ChatAgentResult(
-                reply="Completed requested operations.\n" + "\n".join([f"- {item}" for item in tool_summaries]),
-                used_tools=used_tools,
-                tool_summaries=tool_summaries,
-            )
-        return ChatAgentResult(reply="I could not complete that request. Please rephrase with crop and location details.")
-    except Exception:
-        return await _command_mode_response(database, user, message, context_data)
+    return await _command_mode_response(database, user, message, context_data)

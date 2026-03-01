@@ -3,10 +3,12 @@
 Full-stack prototype for agriculture-focused yield prediction with:
 - Google authentication
 - User-specific saved predictions/surveys/activities
-- AI chatbot guidance
+- Gemini-based AI assistant guidance
 - Crop recommendation and yield forecasting
 - Dashboard charts and analysis
-- Green-themed responsive frontend
+- Tamil/English interface toggle
+- Live location-aware weather + IST widgets
+- Multi-page responsive frontend with overview/news gallery
 
 ## Tech Stack
 
@@ -61,7 +63,7 @@ Edit `backend/.env`:
 - `MONGO_URI`
 - `GOOGLE_CLIENT_ID`
 - `JWT_SECRET_KEY`
-- (optional) `OPENAI_API_KEY`
+- (optional) `GEMINI_API_KEY`
 
 Run API:
 
@@ -111,20 +113,35 @@ Primary training file expected:
 
 ### Manual download fallback
 
-If auto-download is blocked, manually download any crop yield CSV and place it exactly at:
+If auto-download is blocked, manually download and place CSV at:
 - `backend/data/raw/crop_yield.csv`
 
 Then train:
 
 ```bash
-python backend/train_model.py
+python backend/train_model.py --focus-state "Tamil Nadu"
 ```
 
-### Dataset URLs included in code
+### Tamil Nadu official dataset guidance
+
+Run:
+
+```bash
+python backend/scripts/download_datasets.py --official-only
+```
+
+This creates:
+- `backend/data/raw/OFFICIAL_DATASET_GUIDE.txt`
+
+Use official portals listed there (Tamil Nadu Open Data / data.gov.in / TNAU references), then train with:
+
+```bash
+python backend/train_model.py --dataset backend/data/raw/official/<file>.csv --focus-state "Tamil Nadu" --source-name "Official Tamil Nadu Data" --source-url "<official_url>"
+```
+
+### Development fallback URL included in code
 
 - `https://raw.githubusercontent.com/ManikantaSanjay/crop_yield_prediction_regression/master/yield_df.csv`
-- `https://raw.githubusercontent.com/nileshely/Crop-Datasets-for-All-Indian-States/main/Crops_data.csv`
-- `https://raw.githubusercontent.com/Kevinbose/Crop-Yield-Prediction/main/crop_yield_climate_soil_data_2019_2023.csv`
 
 ## 5. Where to Edit for External Dataset Compatibility
 
@@ -158,6 +175,12 @@ If you have not configured Google OAuth yet, use **Continue in Demo Mode** on lo
 ## 7. Features Included
 
 - Google login and JWT session
+- Multi-page app routes:
+  - `/overview` (intro + news gallery)
+  - `/prediction`
+  - `/survey`
+  - `/dashboard`
+  - `/assistant`
 - Yield prediction endpoint: `POST /prediction/predict`
 - Crop recommendation endpoint: `POST /prediction/recommend`
 - Survey save endpoint: `POST /survey/submit`
@@ -165,7 +188,8 @@ If you have not configured Google OAuth yet, use **Continue in Demo Mode** on lo
   - `GET /dashboard/summary`
   - `GET /dashboard/charts`
   - `GET /dashboard/activities`
-- Chatbot endpoint: `POST /chat/message`
+- Chat/assistant endpoint: `POST /chat/message`
+- News endpoint for overview gallery: `GET /news/overview`
 
 ## 7.1 India-Friendly Units
 
@@ -185,10 +209,13 @@ For ML-based predictions:
 2. Run `python backend/train_model.py`
 3. Ensure artifact exists at `backend/models/crop_yield_model.joblib`
 
-## 9. Optional Chatbot Upgrade
+## 9. Gemini Assistant Setup
 
-Set `OPENAI_API_KEY` in `backend/.env` to enable LLM responses.
-Without it, chatbot uses agriculture-focused fallback guidance logic.
+Set in `backend/.env`:
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL` (default: `gemini-1.5-flash`)
+
+Without Gemini key, assistant still works in command mode (`/predict`, `/summary`, etc.).
 
 ## 10. Generative Chat Assistant With App Access
 
@@ -199,11 +226,12 @@ The chatbot can execute core app features for the signed-in user:
 - dashboard summary and charts
 - recent activities/predictions/recommendations lookup
 
-### With OpenAI key
+### With Gemini key
 
-- Natural language + tool-calling (Generative AI mode)
+- Natural language responses via Gemini
+- Command mode actions still available for app operations
 
-### Without OpenAI key
+### Without Gemini key
 
 - Local intent mode with natural prompts and command fallback.
 - Examples:

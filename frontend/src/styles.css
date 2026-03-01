@@ -20,7 +20,7 @@
 body {
   margin: 0;
   color: var(--ink);
-  font-family: "DM Sans", "Trebuchet MS", sans-serif;
+  font-family: "Noto Sans Tamil", "Segoe UI", "DM Sans", sans-serif;
   background:
     radial-gradient(circle at 8% 10%, rgba(163, 230, 53, 0.34), transparent 28%),
     radial-gradient(circle at 88% 16%, rgba(34, 197, 94, 0.23), transparent 24%),
@@ -34,6 +34,10 @@ h3,
 h4,
 p {
   margin: 0;
+}
+
+a {
+  color: inherit;
 }
 
 .login-page {
@@ -58,7 +62,7 @@ p {
 .login-card h1 {
   font-size: clamp(1.7rem, 3vw, 2.5rem);
   color: var(--green-dark);
-  font-family: "Cabin", sans-serif;
+  font-family: "Baloo 2", "Segoe UI", sans-serif;
 }
 
 .eyebrow {
@@ -84,17 +88,29 @@ p {
   backdrop-filter: blur(10px);
   background: rgba(20, 83, 45, 0.92);
   color: #fff;
-  padding: 14px 22px;
+  padding: 12px 18px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
+}
+
+.brand-area {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .brand-mark {
-  font-family: "Cabin", sans-serif;
+  font-family: "Baloo 2", "Segoe UI", sans-serif;
   font-weight: 700;
-  font-size: 1.35rem;
+  font-size: 1.4rem;
 }
 
 .brand-sub {
@@ -102,24 +118,72 @@ p {
   font-size: 0.85rem;
 }
 
+.top-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.nav-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 7px 11px;
+  text-decoration: none;
+  font-size: 0.83rem;
+  color: #ecfdf5;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-chip.active {
+  background: #bbf7d0;
+  color: #14532d;
+  border-color: transparent;
+}
+
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.weather-time-widget {
+  min-width: 190px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 8px 10px;
+  display: grid;
+  gap: 2px;
+}
+
+.wt-time {
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.wt-weather,
+.wt-place {
+  font-size: 0.75rem;
+  color: #dcfce7;
 }
 
 .profile-chip {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   background: rgba(255, 255, 255, 0.11);
-  padding: 8px 11px;
+  padding: 6px 10px;
   border-radius: 999px;
 }
 
 .profile-chip img {
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
   object-fit: cover;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.5);
@@ -134,14 +198,22 @@ p {
   background: transparent;
   color: #fff;
   border-radius: 10px;
-  padding: 8px 14px;
+  padding: 8px 12px;
   cursor: pointer;
+}
+
+.ghost-btn.dark {
+  border-color: rgba(22, 101, 52, 0.4);
+  color: #14532d;
 }
 
 .dashboard-content {
   padding: 20px clamp(16px, 3vw, 34px) 90px;
+}
+
+.page-stack {
   display: grid;
-  gap: 18px;
+  gap: 16px;
 }
 
 .summary-grid {
@@ -177,15 +249,17 @@ p {
   color: var(--green-dark);
 }
 
-.content-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 14px;
+.hero-card h2 {
+  margin-bottom: 8px;
+  color: #14532d;
+  font-size: clamp(1.4rem, 2.4vw, 2rem);
 }
 
-.column {
-  display: grid;
-  gap: 14px;
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .card {
@@ -203,12 +277,64 @@ p {
 
 .card-head h3 {
   color: #14532d;
-  font-family: "Cabin", sans-serif;
+  font-family: "Baloo 2", "Segoe UI", sans-serif;
 }
 
 .card-head p {
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.news-card {
+  border: 1px solid rgba(22, 163, 74, 0.2);
+  border-radius: 14px;
+  background: #f8fff3;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 120px auto;
+}
+
+.news-image {
+  background: linear-gradient(140deg, #166534, #84cc16);
+  color: white;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+}
+
+.news-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.news-body {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.news-body h4 {
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+.news-body p {
+  font-size: 0.87rem;
+  color: #355647;
+  line-height: 1.35;
+}
+
+.news-link {
+  color: #166534;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .form-grid {
@@ -256,6 +382,7 @@ textarea:focus {
   padding: 10px 16px;
   cursor: pointer;
   font-weight: 700;
+  text-decoration: none;
 }
 
 .primary-btn {
@@ -355,28 +482,11 @@ textarea:focus {
   min-height: 350px;
 }
 
-.chatbot {
-  position: fixed;
-  right: 16px;
-  bottom: 14px;
-  z-index: 200;
-  width: min(92vw, 360px);
-}
-
-.chatbot-toggle {
-  width: 100%;
-  border: 0;
-  border-radius: 14px;
-  padding: 11px 14px;
-  font-weight: 700;
-  color: #fff;
-  background: linear-gradient(135deg, #166534, #0f766e);
-  cursor: pointer;
-  box-shadow: 0 12px 26px rgba(15, 118, 110, 0.35);
+.assistant-card .chatbot-panel {
+  margin-top: 0;
 }
 
 .chatbot-panel {
-  margin-top: 10px;
   background: #f0fdf4;
   border-radius: 18px;
   border: 1px solid rgba(34, 197, 94, 0.35);
@@ -385,7 +495,7 @@ textarea:focus {
 }
 
 .chatbot-messages {
-  max-height: 280px;
+  max-height: 360px;
   overflow: auto;
   padding: 12px;
   display: grid;
@@ -396,7 +506,7 @@ textarea:focus {
   border-radius: 12px;
   padding: 10px;
   font-size: 0.92rem;
-  line-height: 1.38;
+  line-height: 1.42;
 }
 
 .chat-bubble.assistant {
@@ -466,23 +576,28 @@ textarea:focus {
   }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1280px) {
   .summary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .content-grid,
-  .chart-grid {
+  .chart-grid,
+  .news-grid {
     grid-template-columns: 1fr;
   }
-}
 
-@media (max-width: 760px) {
   .topbar {
     align-items: flex-start;
     flex-direction: column;
   }
 
+  .topbar-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
   .form-grid {
     grid-template-columns: 1fr;
   }
@@ -497,5 +612,9 @@ textarea:focus {
 
   .login-card {
     padding: 30px 24px;
+  }
+
+  .nav-chip {
+    font-size: 0.78rem;
   }
 }

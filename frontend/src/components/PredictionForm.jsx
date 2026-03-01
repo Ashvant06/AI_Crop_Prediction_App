@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const ACRE_TO_HECTARE = 0.404686;
 const ACRE_PER_HECTARE = 2.47105;
@@ -6,44 +6,45 @@ const QUINTAL_PER_TON = 10;
 
 const defaultForm = {
   crop: "rice",
-  state: "karnataka",
+  state: "tamil nadu",
   district: "",
   year: 2026,
   area_acres: 2.5,
   rainfall_mm: 850,
-  temperature_c: 25,
-  humidity_pct: 65,
+  temperature_c: 30,
+  humidity_pct: 70,
   nitrogen: 70,
   phosphorus: 40,
   potassium: 40,
   soil_ph: 6.5,
   pesticides_kg: 30,
-  previous_yield_quintal_acre: 12
+  previous_yield_quintal_acre: 12,
 };
 
 function NumericInput({ name, label, value, onChange, step = 0.1, min }) {
   return (
     <label>
       <span>{label}</span>
-      <input
-        type="number"
-        name={name}
-        value={value}
-        step={step}
-        min={min}
-        onChange={onChange}
-      />
+      <input type="number" name={name} value={value} step={step} min={min} onChange={onChange} />
     </label>
   );
 }
 
-function PredictionForm({ onPredict, onRecommend, loading }) {
+function PredictionForm({ onPredict, onRecommend, loading, defaultLocation }) {
   const [formData, setFormData] = useState(defaultForm);
+
+  useEffect(() => {
+    if (!defaultLocation) return;
+    setFormData((prev) => ({
+      ...prev,
+      state: defaultLocation.state || prev.state,
+      district: defaultLocation.district || prev.district,
+    }));
+  }, [defaultLocation]);
 
   const toApiPayload = () => {
     const areaHectares = formData.area_acres * ACRE_TO_HECTARE;
-    const previousYieldTonHectare =
-      (formData.previous_yield_quintal_acre * ACRE_PER_HECTARE) / QUINTAL_PER_TON;
+    const previousYieldTonHectare = (formData.previous_yield_quintal_acre * ACRE_PER_HECTARE) / QUINTAL_PER_TON;
     const pesticidesTonnes = formData.pesticides_kg / 1000;
 
     return {
@@ -60,7 +61,7 @@ function PredictionForm({ onPredict, onRecommend, loading }) {
       potassium: formData.potassium,
       soil_ph: formData.soil_ph,
       pesticides_tonnes: Number(pesticidesTonnes.toFixed(5)),
-      previous_yield_ton_hectare: Number(previousYieldTonHectare.toFixed(4))
+      previous_yield_ton_hectare: Number(previousYieldTonHectare.toFixed(4)),
     };
   };
 
@@ -68,6 +69,15 @@ function PredictionForm({ onPredict, onRecommend, loading }) {
     const { name, value, type } = event.target;
     const normalizedValue = type === "number" ? Number(value) : value;
     setFormData((prev) => ({ ...prev, [name]: normalizedValue }));
+  };
+
+  const applyDetectedLocation = () => {
+    if (!defaultLocation) return;
+    setFormData((prev) => ({
+      ...prev,
+      state: defaultLocation.state || prev.state,
+      district: defaultLocation.district || prev.district,
+    }));
   };
 
   const handlePredict = async (event) => {
@@ -83,7 +93,7 @@ function PredictionForm({ onPredict, onRecommend, loading }) {
     <section className="card">
       <div className="card-head">
         <h3>Yield Prediction</h3>
-        <p>India-friendly inputs: area in acres and yield in quintals.</p>
+        <p>Tamil Nadu-first inputs with acres and quintals</p>
       </div>
       <form className="form-grid" onSubmit={handlePredict}>
         <label>
@@ -163,6 +173,9 @@ function PredictionForm({ onPredict, onRecommend, loading }) {
           </button>
           <button type="button" className="secondary-btn" onClick={handleRecommend} disabled={loading}>
             Recommend Crops
+          </button>
+          <button type="button" className="ghost-btn dark" onClick={applyDetectedLocation}>
+            Apply Detected Location
           </button>
         </div>
       </form>

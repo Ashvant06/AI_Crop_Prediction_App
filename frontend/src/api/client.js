@@ -50,4 +50,8 @@ export const chatApi = {
   sendMessage: (payload) => apiClient.post("/chat/message", payload, { timeout: 60000 })
 };
 
+export const newsApi = {
+  getOverview: (limit = 9) => apiClient.get(`/news/overview?limit=${limit}`)
+};
+
 export default apiClient;

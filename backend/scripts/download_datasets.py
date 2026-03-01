@@ -3,27 +3,26 @@ from pathlib import Path
 
 import httpx
 
-
 DATASETS = [
     {
-        "name": "yield_df",
+        "name": "tn_open_sample",
         "url": "https://raw.githubusercontent.com/ManikantaSanjay/crop_yield_prediction_regression/master/yield_df.csv",
         "filename": "crop_yield.csv",
-        "description": "Global crop yield + rainfall + temperature dataset",
-    },
-    {
-        "name": "india_crop_state",
-        "url": "https://raw.githubusercontent.com/nileshely/Crop-Datasets-for-All-Indian-States/main/Crops_data.csv",
-        "filename": "india_crop_state.csv",
-        "description": "State-wise crop production records in India",
-    },
-    {
-        "name": "climate_soil",
-        "url": "https://raw.githubusercontent.com/Kevinbose/Crop-Yield-Prediction/main/crop_yield_climate_soil_data_2019_2023.csv",
-        "filename": "climate_soil_crop_yield.csv",
-        "description": "Climate + soil + crop yield records",
+        "description": "Sample fallback dataset (non-official) for development only",
     },
 ]
+
+OFFICIAL_DATA_GUIDE = """Tamil Nadu focused official dataset guidance:
+1. Government of Tamil Nadu Open Data Portal: https://tn.data.gov.in/
+2. India Open Government Data (Agriculture): https://www.data.gov.in/
+3. TNAU AgriTech Portal references: https://www.agritech.tnau.ac.in/
+
+Download district/state crop-yield CSV files from official portals and place them under:
+backend/data/raw/official/
+
+Then train with:
+python backend/train_model.py --dataset backend/data/raw/official/<your_file>.csv --focus-state "Tamil Nadu" --source-name "Official Tamil Nadu Data" --source-url "<portal_url>"
+"""
 
 
 def download_dataset(dataset: dict, out_dir: Path) -> bool:
@@ -41,7 +40,7 @@ def download_dataset(dataset: dict, out_dir: Path) -> bool:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Download public crop yield datasets.")
+    parser = argparse.ArgumentParser(description="Download dataset for local development and print official-source guide.")
     parser.add_argument(
         "--out-dir",
         type=str,
@@ -49,27 +48,29 @@ def main() -> None:
         help="Destination directory for downloaded CSV files",
     )
     parser.add_argument(
-        "--primary-only",
+        "--official-only",
         action="store_true",
-        help="Download only the primary training dataset as crop_yield.csv",
+        help="Skip fallback downloads and print only official dataset guidance",
     )
     args = parser.parse_args()
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    targets = DATASETS[:1] if args.primary_only else DATASETS
+    guide_path = out_dir / "OFFICIAL_DATASET_GUIDE.txt"
+    guide_path.write_text(OFFICIAL_DATA_GUIDE, encoding="utf-8")
+    print(f"[info] Official dataset guide -> {guide_path}")
+
+    if args.official_only:
+        print("Skipped fallback downloads (--official-only).")
+        return
+
     success = 0
-    for dataset in targets:
+    for dataset in DATASETS:
         if download_dataset(dataset, out_dir):
             success += 1
 
-    print(f"Downloaded {success}/{len(targets)} dataset(s).")
-    if success == 0:
-        print(
-            "No dataset downloaded. Manually place a CSV at "
-            "backend/data/raw/crop_yield.csv and then run backend/train_model.py."
-        )
+    print(f"Downloaded {success}/{len(DATASETS)} dataset(s).")
 
 
 if __name__ == "__main__":
