@@ -16,6 +16,7 @@ from app.services.dashboard_service import (
     fetch_dashboard_summary,
     fetch_recent_activities,
 )
+from app.services.knowledge_service import build_knowledge_context, find_relevant_knowledge
 from app.services.model_service import model_service
 
 ACRE_PER_HECTARE = 2.47105
@@ -78,8 +79,8 @@ class ChatAgentResult:
     tool_summaries: list[str] = field(default_factory=list)
 
 
-def _assistant_prompt(user_name: str) -> str:
-    return (
+def _assistant_prompt(user_name: str, knowledge_context: str = "") -> str:
+    prompt = (
         "You are AgroAI Copilot for Tamil Nadu farmers. "
         f"Current user: {user_name}. "
         "Keep language simple, practical, and respectful. "
@@ -87,6 +88,9 @@ def _assistant_prompt(user_name: str) -> str:
         "Use India-friendly units: q/acre, q/ha, acres, quintals. "
         "If the user writes in Tamil, answer in Tamil. Otherwise answer in English."
     )
+    if knowledge_context:
+        prompt += "\n\n" + knowledge_context
+    return prompt
 
 
 def _normalize_limit(limit_value: Any, default: int = 10) -> int:
@@ -433,10 +437,7 @@ async def _command_mode_response(
                 tool_summaries=[summary],
             )
         return ChatAgentResult(
-            reply=(
-                "I can run app actions for you. Ask: show dashboard summary, predict yield, "
-                "recommend crops, show activities, or use /help for command format."
-            ),
+            reply=_general_guidance_reply(text),
             used_tools=[],
             tool_summaries=[],
         )
@@ -476,6 +477,7 @@ async def _gemini_chat_reply(
     user: dict,
     message: str,
     history: list[ChatHistoryMessage],
+    knowledge_context: str,
 ) -> str | None:
     contents: list[dict[str, Any]] = []
     for turn in history[-6:]:
@@ -484,7 +486,7 @@ async def _gemini_chat_reply(
     contents.append({"role": "user", "parts": [{"text": message}]})
 
     payload = {
-        "systemInstruction": {"parts": [{"text": _assistant_prompt(user.get("name", "Farmer"))}]},
+        "systemInstruction": {"parts": [{"text": _assistant_prompt(user.get("name", "Farmer"), knowledge_context)}]},
         "contents": contents,
         "generationConfig": {"temperature": 0.4, "maxOutputTokens": 500},
     }
@@ -509,6 +511,24 @@ async def _gemini_chat_reply(
         return None
 
 
+def _general_guidance_reply(user_text: str) -> str:
+    snippets = find_relevant_knowledge(user_text, top_k=4)
+    if not snippets:
+        return (
+            "I can run app actions for you. Ask: show dashboard summary, predict yield, "
+            "recommend crops, show activities, or use /help for command format."
+        )
+
+    lines = [
+        "General farming guidance from the knowledge dataset:",
+    ]
+    for item in snippets:
+        lines.append(f"- {item['title']}: {item['content']}")
+    lines.append("")
+    lines.append("You can also ask commands like /predict, /recommend, /summary.")
+    return "\n".join(lines)
+
+
 async def get_chat_reply(
     *,
     database,
@@ -521,6 +541,7 @@ async def get_chat_reply(
     turns = history or []
     context_data = context or {}
     trimmed = message.strip()
+    knowledge_context = build_knowledge_context(trimmed)
 
     inferred = None if trimmed.startswith("/") else _infer_tool_from_text(trimmed)
     if trimmed.startswith("/") or inferred is not None:
@@ -533,6 +554,7 @@ async def get_chat_reply(
             user=user,
             message=message,
             history=turns,
+            knowledge_context=knowledge_context,
         )
         if gemini_reply:
             return ChatAgentResult(reply=gemini_reply)

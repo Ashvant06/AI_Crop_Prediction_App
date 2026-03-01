@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     openai_model: str = Field(default="gpt-4o-mini", alias="OPENAI_MODEL")
     gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
     gemini_model: str = Field(default="gemini-1.5-flash", alias="GEMINI_MODEL")
+    knowledge_base_paths: str = Field(
+        default="backend/data/knowledge/general_agri_knowledge.json", alias="KNOWLEDGE_BASE_PATHS"
+    )
+    knowledge_top_k: int = Field(default=6, alias="KNOWLEDGE_TOP_K")
 
     model_artifact_path: str = Field(
         default="backend/models/crop_yield_model.joblib", alias="MODEL_ARTIFACT_PATH"
@@ -39,6 +43,10 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def knowledge_base_path_list(self) -> list[str]:
+        return [item.strip() for item in self.knowledge_base_paths.split(",") if item.strip()]
 
 
 @lru_cache(maxsize=1)

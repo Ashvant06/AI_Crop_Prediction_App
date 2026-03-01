@@ -214,8 +214,26 @@ For ML-based predictions:
 Set in `backend/.env`:
 - `GEMINI_API_KEY`
 - `GEMINI_MODEL` (default: `gemini-1.5-flash`)
+- `KNOWLEDGE_BASE_PATHS` (comma-separated JSON files for assistant knowledge)
+- `KNOWLEDGE_TOP_K` (retrieval snippets count)
 
 Without Gemini key, assistant still works in command mode (`/predict`, `/summary`, etc.).
+
+### Assistant Knowledge Datasets
+
+Default general agriculture knowledge dataset:
+- `backend/data/knowledge/general_agri_knowledge.json`
+
+To feed more datasets into assistant:
+1. Add additional JSON files with the same structure (`id`, `title`, `content`, `tags`, `source`, `region`).
+2. Add their paths to `KNOWLEDGE_BASE_PATHS` separated by commas.
+3. Redeploy backend.
+
+Convert CSV datasets into knowledge JSON quickly:
+
+```bash
+python backend/scripts/build_knowledge_from_csv.py --csv backend/data/raw/your_data.csv --out backend/data/knowledge/your_data.generated.json --title-column title --content-column content --source-name "your_source" --region "india"
+```
 
 ## 10. Generative Chat Assistant With App Access
 

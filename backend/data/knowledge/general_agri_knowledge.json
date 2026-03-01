@@ -1,0 +1,282 @@
+[
+  {
+    "id": "kb-001",
+    "title": "Rice nursery seed treatment before sowing",
+    "content": "Treat paddy seeds with recommended fungicide or bio-agent before nursery sowing to reduce seed-borne diseases and improve early vigor.",
+    "tags": ["rice", "nursery", "seed treatment", "disease prevention", "tn"],
+    "source": "TNAU advisory",
+    "region": "tamil nadu"
+  },
+  {
+    "id": "kb-002",
+    "title": "Tamil Nadu samba paddy water management",
+    "content": "During samba season, avoid continuous deep flooding. Maintain shallow irrigation and alternate wetting and drying to save water and maintain yield.",
+    "tags": ["rice", "samba", "irrigation", "water saving", "tn"],
+    "source": "Tamil Nadu agriculture extension",
+    "region": "tamil nadu"
+  },
+  {
+    "id": "kb-003",
+    "title": "Soil testing frequency",
+    "content": "Conduct soil testing at least once in 2 to 3 years and before major crop planning to apply balanced NPK and micronutrients.",
+    "tags": ["soil", "fertilizer", "nutrient management", "general"],
+    "source": "ICAR extension",
+    "region": "india"
+  },
+  {
+    "id": "kb-004",
+    "title": "Nitrogen split application in cereals",
+    "content": "Apply nitrogen in split doses at basal, active tillering, and panicle initiation stages in cereals for better uptake and lower loss.",
+    "tags": ["nitrogen", "fertilizer", "rice", "maize", "general"],
+    "source": "Agronomy best practice",
+    "region": "india"
+  },
+  {
+    "id": "kb-005",
+    "title": "Avoid fertilizer before heavy rain",
+    "content": "Do not apply urea and soluble fertilizers immediately before heavy rainfall to reduce runoff and nutrient loss.",
+    "tags": ["fertilizer", "rainfall", "loss prevention", "general"],
+    "source": "Farm advisory",
+    "region": "india"
+  },
+  {
+    "id": "kb-006",
+    "title": "Drip irrigation suitability",
+    "content": "Drip irrigation is highly suitable for sugarcane, banana, vegetables, and orchards where water is limited and precise dosing is needed.",
+    "tags": ["drip", "irrigation", "sugarcane", "banana", "general"],
+    "source": "Irrigation extension",
+    "region": "india"
+  },
+  {
+    "id": "kb-007",
+    "title": "Mulching benefits in dry belts",
+    "content": "Organic or plastic mulch helps reduce evaporation, suppress weeds, and moderate soil temperature in dry regions.",
+    "tags": ["mulch", "water conservation", "soil health", "general"],
+    "source": "Dryland farming guide",
+    "region": "india"
+  },
+  {
+    "id": "kb-008",
+    "title": "Integrated pest management steps",
+    "content": "Use pest surveillance, economic threshold levels, bio-control, and only need-based pesticide spray to reduce cost and resistance.",
+    "tags": ["ipm", "pest", "spray", "general"],
+    "source": "Plant protection guide",
+    "region": "india"
+  },
+  {
+    "id": "kb-009",
+    "title": "Brown planthopper caution in rice",
+    "content": "Avoid excess nitrogen in paddy fields and monitor lower canopy regularly, as dense humid fields increase brown planthopper pressure.",
+    "tags": ["rice", "brown planthopper", "nitrogen", "tn"],
+    "source": "Rice pest advisory",
+    "region": "tamil nadu"
+  },
+  {
+    "id": "kb-010",
+    "title": "Fall armyworm monitoring in maize",
+    "content": "Check maize whorls twice weekly in early growth stages and use pheromone traps and recommended control methods at threshold levels.",
+    "tags": ["maize", "fall armyworm", "monitoring", "general"],
+    "source": "Maize advisory",
+    "region": "india"
+  },
+  {
+    "id": "kb-011",
+    "title": "Cotton pink bollworm risk",
+    "content": "Synchronize sowing, avoid long crop duration, and monitor square and boll stages to reduce pink bollworm carryover.",
+    "tags": ["cotton", "pink bollworm", "monitoring", "general"],
+    "source": "Cotton pest guide",
+    "region": "india"
+  },
+  {
+    "id": "kb-012",
+    "title": "Groundnut moisture stress management",
+    "content": "Critical irrigation stages in groundnut include flowering and peg formation. Moisture stress during these stages significantly reduces pod yield.",
+    "tags": ["groundnut", "irrigation", "flowering", "general"],
+    "source": "Oilseed production guide",
+    "region": "india"
+  },
+  {
+    "id": "kb-013",
+    "title": "Millet climate resilience",
+    "content": "Millets such as cumbu and ragi are relatively drought tolerant and suitable for low-rainfall or uncertain monsoon conditions.",
+    "tags": ["millets", "climate resilience", "drought", "tn"],
+    "source": "Dryland crop advisory",
+    "region": "tamil nadu"
+  },
+  {
+    "id": "kb-014",
+    "title": "Banana pseudostem support in wind",
+    "content": "Provide physical support to banana pseudostems during high wind periods to reduce lodging and bunch loss.",
+    "tags": ["banana", "wind", "orchard", "general"],
+    "source": "Horticulture advisory",
+    "region": "india"
+  },
+  {
+    "id": "kb-015",
+    "title": "Seasonal crop planning with rainfall outlook",
+    "content": "Match crop duration to expected rainfall window and water availability; avoid long-duration varieties in uncertain monsoon years.",
+    "tags": ["crop planning", "rainfall", "risk management", "general"],
+    "source": "Climate-smart agriculture",
+    "region": "india"
+  },
+  {
+    "id": "kb-016",
+    "title": "Farm pond and recharge structures",
+    "content": "Small farm ponds and recharge pits can improve supplemental irrigation availability and groundwater recharge in rainfed villages.",
+    "tags": ["farm pond", "water harvesting", "rainfed", "general"],
+    "source": "Water conservation mission",
+    "region": "india"
+  },
+  {
+    "id": "kb-017",
+    "title": "Safe pesticide spray timing",
+    "content": "Spray during low wind periods, preferably early morning or late afternoon, and avoid peak heat to improve coverage and safety.",
+    "tags": ["pesticide", "spray timing", "safety", "general"],
+    "source": "Plant protection safety",
+    "region": "india"
+  },
+  {
+    "id": "kb-018",
+    "title": "Personal protective equipment during spraying",
+    "content": "Use mask, gloves, full sleeves, and avoid eating or smoking during spray operations. Follow label dose and pre-harvest interval.",
+    "tags": ["pesticide", "safety", "health", "general"],
+    "source": "Farm safety protocol",
+    "region": "india"
+  },
+  {
+    "id": "kb-019",
+    "title": "Post-harvest drying of grains",
+    "content": "Dry grains to safe moisture levels before storage to reduce fungal growth and storage losses.",
+    "tags": ["post-harvest", "storage", "grains", "general"],
+    "source": "Post-harvest management",
+    "region": "india"
+  },
+  {
+    "id": "kb-020",
+    "title": "Use clean and graded seed",
+    "content": "Good quality and graded seed improves germination uniformity, stand establishment, and eventual yield performance.",
+    "tags": ["seed", "germination", "yield", "general"],
+    "source": "Seed technology guide",
+    "region": "india"
+  },
+  {
+    "id": "kb-021",
+    "title": "Tamil Nadu district variability",
+    "content": "Input planning differs across delta, western, and southern dry districts. Use district-level climate and water profile in recommendations.",
+    "tags": ["district planning", "tamil nadu", "regional advice", "tn"],
+    "source": "State extension planning",
+    "region": "tamil nadu"
+  },
+  {
+    "id": "kb-022",
+    "title": "Weather-based pest alert usage",
+    "content": "Combine local humidity and temperature with pest history to decide monitoring intensity and preventive actions.",
+    "tags": ["weather", "pest alert", "decision support", "general"],
+    "source": "Agromet advisory",
+    "region": "india"
+  },
+  {
+    "id": "kb-023",
+    "title": "Balanced micronutrient management",
+    "content": "Deficiencies of zinc, boron, and iron can limit yield despite adequate NPK; correct only after diagnosis through soil or plant symptoms.",
+    "tags": ["micronutrients", "zinc", "boron", "general"],
+    "source": "Nutrient management",
+    "region": "india"
+  },
+  {
+    "id": "kb-024",
+    "title": "Organic matter for soil structure",
+    "content": "Applying compost, farmyard manure, or green manure improves soil aggregation, moisture retention, and microbial activity.",
+    "tags": ["organic matter", "soil health", "compost", "general"],
+    "source": "Soil biology advisory",
+    "region": "india"
+  },
+  {
+    "id": "kb-025",
+    "title": "Weed control in early crop stage",
+    "content": "The first 30 to 45 days are often critical for weed management in many crops; delayed control causes irreversible yield loss.",
+    "tags": ["weed", "critical period", "yield protection", "general"],
+    "source": "Weed science guide",
+    "region": "india"
+  },
+  {
+    "id": "kb-026",
+    "title": "Crop residue management",
+    "content": "Retaining or incorporating residues can improve soil carbon and reduce erosion when managed properly with nutrient balancing.",
+    "tags": ["residue", "soil carbon", "erosion", "general"],
+    "source": "Conservation agriculture",
+    "region": "india"
+  },
+  {
+    "id": "kb-027",
+    "title": "Market-aware crop diversification",
+    "content": "Diversify crops based on local market demand, storage feasibility, and risk spread rather than relying on a single crop.",
+    "tags": ["market", "diversification", "income", "general"],
+    "source": "Farm economics advisory",
+    "region": "india"
+  },
+  {
+    "id": "kb-028",
+    "title": "Record keeping for farm decisions",
+    "content": "Maintain records of sowing date, input use, pest events, yield, and price realized to improve next-season planning.",
+    "tags": ["record keeping", "farm planning", "general"],
+    "source": "Farm management practice",
+    "region": "india"
+  },
+  {
+    "id": "kb-029",
+    "title": "Heat stress mitigation",
+    "content": "During heat waves, increase mulch cover, adjust irrigation frequency, and avoid stress-inducing operations in peak afternoon.",
+    "tags": ["heat stress", "climate", "irrigation", "general"],
+    "source": "Climate adaptation",
+    "region": "india"
+  },
+  {
+    "id": "kb-030",
+    "title": "Flood recovery in fields",
+    "content": "After water stagnation, drain fields quickly, assess root damage, and use recovery nutrient sprays only after crop survival assessment.",
+    "tags": ["flood", "drainage", "recovery", "general"],
+    "source": "Disaster response advisory",
+    "region": "india"
+  },
+  {
+    "id": "kb-031",
+    "title": "Localized advisory communication",
+    "content": "Use village and district names clearly in guidance so farmers can map recommendations to their real local conditions.",
+    "tags": ["communication", "localization", "tn"],
+    "source": "Extension communication",
+    "region": "tamil nadu"
+  },
+  {
+    "id": "kb-032",
+    "title": "Seed replacement rate improvement",
+    "content": "Regularly replacing old seed stock with quality certified seed supports better disease resistance and yield consistency.",
+    "tags": ["seed replacement", "quality seed", "general"],
+    "source": "Seed systems advisory",
+    "region": "india"
+  },
+  {
+    "id": "kb-033",
+    "title": "Livestock-farm integration benefits",
+    "content": "Integrating livestock with crops can improve nutrient cycling through manure and diversify household farm income.",
+    "tags": ["livestock", "integrated farming", "income", "general"],
+    "source": "Integrated farming systems",
+    "region": "india"
+  },
+  {
+    "id": "kb-034",
+    "title": "FPO and collective marketing advantage",
+    "content": "Farmer producer groups can improve bargaining power, bulk input purchase, and better price realization.",
+    "tags": ["fpo", "marketing", "collective action", "general"],
+    "source": "Farmer institution guidance",
+    "region": "india"
+  },
+  {
+    "id": "kb-035",
+    "title": "Simple digital advisory adoption",
+    "content": "Short, voice-friendly, language-local advisories improve usability for first-time digital users in villages.",
+    "tags": ["digital advisory", "voice", "local language", "tn"],
+    "source": "Rural ICT advisory",
+    "region": "tamil nadu"
+  }
+]

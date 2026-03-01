@@ -11,6 +11,7 @@ backend/models/
 backend/data/raw/
 backend/data/processed/
 backend/data/local_store.json
+backend/data/knowledge/*.generated.json
 
 # Frontend
 frontend/node_modules/
