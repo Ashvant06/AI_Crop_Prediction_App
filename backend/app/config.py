@@ -18,8 +18,6 @@ class Settings(BaseSettings):
     local_db_fallback: bool = Field(default=True, alias="LOCAL_DB_FALLBACK")
     local_db_path: str = Field(default="backend/data/local_store.json", alias="LOCAL_DB_PATH")
 
-    google_client_id: str = Field(default="", alias="GOOGLE_CLIENT_ID")
-    google_client_ids: str = Field(default="", alias="GOOGLE_CLIENT_IDS")
     allow_dev_auth: bool = Field(default=True, alias="ALLOW_DEV_AUTH")
 
     openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
@@ -54,18 +52,6 @@ class Settings(BaseSettings):
     @property
     def knowledge_base_path_list(self) -> list[str]:
         return [item.strip() for item in self.knowledge_base_paths.split(",") if item.strip()]
-
-    @property
-    def google_client_id_list(self) -> list[str]:
-        from_google_client_id = [self.google_client_id.strip()] if self.google_client_id.strip() else []
-        from_google_client_ids = [item.strip() for item in self.google_client_ids.split(",") if item.strip()]
-        merged = from_google_client_id + from_google_client_ids
-        deduped: list[str] = []
-        for item in merged:
-            if item not in deduped:
-                deduped.append(item)
-        return deduped
-
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

@@ -39,7 +39,7 @@ export const clearAccessToken = () => {
 export const getAccessToken = () => localStorage.getItem(TOKEN_KEY);
 
 export const authApi = {
-  googleLogin: (credential) => apiClient.post("/auth/google", { credential }),
+  phoneLogin: (payload) => apiClient.post("/auth/phone", payload),
   devLogin: (payload) => apiClient.post("/auth/dev", payload)
 };
 

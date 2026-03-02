@@ -50,7 +50,7 @@ function Navbar() {
           {user?.picture ? <img src={user.picture} alt={user.name} /> : null}
           <div>
             <p>{user?.name || "Farmer"}</p>
-            <small>{user?.email || ""}</small>
+            <small>{user?.phone_number || user?.email || ""}</small>
           </div>
         </div>
         <button type="button" onClick={logout} className="ghost-btn">

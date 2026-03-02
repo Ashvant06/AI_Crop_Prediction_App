@@ -4,8 +4,9 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 
-class GoogleAuthRequest(BaseModel):
-    credential: str = Field(min_length=20)
+class PhoneAuthRequest(BaseModel):
+    phone_number: str = Field(min_length=8, max_length=20)
+    name: str = Field(default="Farmer", min_length=2, max_length=80)
 
 
 class DevAuthRequest(BaseModel):
@@ -17,6 +18,7 @@ class UserProfile(BaseModel):
     id: str
     name: str
     email: str
+    phone_number: str | None = None
     picture: str | None = None
 
 

@@ -54,18 +54,21 @@ export function AuthProvider({ children }) {
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState("");
 
-  const loginWithGoogleCredential = async (credential) => {
+  const loginWithPhone = async ({ phoneNumber, name }) => {
     setAuthLoading(true);
     setAuthError("");
     try {
-      const response = await authApi.googleLogin(credential);
+      const response = await authApi.phoneLogin({
+        phone_number: phoneNumber,
+        name: name || "Farmer"
+      });
       const { access_token, user: userProfile } = response.data;
       setAccessToken(access_token);
       localStorage.setItem(USER_KEY, JSON.stringify(userProfile));
       setUser(userProfile);
       return true;
     } catch (error) {
-      const detail = extractErrorDetail(error, "Google sign-in failed.");
+      const detail = extractErrorDetail(error, "Phone sign-in failed.");
       setAuthError(detail);
       return false;
     } finally {
@@ -107,7 +110,7 @@ export function AuthProvider({ children }) {
       isAuthenticated: Boolean(user),
       authLoading,
       authError,
-      loginWithGoogleCredential,
+      loginWithPhone,
       loginAsDemo,
       logout
     }),

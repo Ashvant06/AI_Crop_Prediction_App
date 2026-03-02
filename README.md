@@ -1,7 +1,7 @@
 # AI Crop Yield Prediction System (React + Python + MongoDB)
 
 Full-stack prototype for agriculture-focused yield prediction with:
-- Google authentication
+- Phone number authentication
 - User-specific saved predictions/surveys/activities
 - Gemini-based AI assistant guidance
 - Crop recommendation and yield forecasting
@@ -12,7 +12,7 @@ Full-stack prototype for agriculture-focused yield prediction with:
 
 ## Tech Stack
 
-- Frontend: React + Vite + Recharts + Google OAuth UI
+- Frontend: React + Vite + Recharts
 - Backend: FastAPI + Python ML + JWT auth
 - Database: MongoDB
 - ML: Random Forest + XGBoost (fallback Gradient Boosting) + Voting ensemble
@@ -61,8 +61,8 @@ copy .env.example .env
 
 Edit `backend/.env`:
 - `MONGO_URI`
-- `GOOGLE_CLIENT_ID`
 - `JWT_SECRET_KEY`
+- `ALLOW_DEV_AUTH`
 - (optional) `GEMINI_API_KEY`
 
 Run API:
@@ -81,7 +81,6 @@ copy .env.example .env
 
 Edit `frontend/.env`:
 - `VITE_API_BASE_URL=http://localhost:8000`
-- `VITE_GOOGLE_CLIENT_ID=<same Google client id as backend>`
 
 Run web app:
 
@@ -155,49 +154,25 @@ If your CSV columns differ, update:
 
 3. Optional: adjust frontend form fields in `frontend/src/components/PredictionForm.jsx`
 
-## 6. Google Authentication
+## 6. Phone Authentication
 
-1. Create OAuth client in Google Cloud Console (Web application).
-2. Add authorized JS origin:
-- `http://localhost:5173`
-3. Add backend URL in allowed origins if needed.
-4. Put same client id in:
-- `backend/.env` as `GOOGLE_CLIENT_ID`
-- `frontend/.env` as `VITE_GOOGLE_CLIENT_ID`
+Use phone number login on the sign-in page.
+- Frontend sends `phone_number` and optional `name`.
+- Backend endpoint: `POST /auth/phone`
+- Backend normalizes phone number format and returns JWT + user profile.
 
-If you use multiple Google OAuth web clients, add all backend-accepted IDs in:
-- `GOOGLE_CLIENT_IDS=id1.apps.googleusercontent.com,id2.apps.googleusercontent.com`
+Current implementation is direct phone login (no OTP provider integration).
 
-## 6.1 Demo Login (No Google Setup Required)
+## 6.1 Demo Login (Optional)
 
-If you have not configured Google OAuth yet, use **Continue in Demo Mode** on login page.
+Use **Continue in Demo Mode** on login page when needed.
 
 - Backend dev auth endpoint: `POST /auth/dev`
 - Controlled by `ALLOW_DEV_AUTH=true` in `backend/.env`
 
-## 6.2 Render OAuth Troubleshooting
-
-If Google login keeps returning to the login page:
-
-1. Frontend env (`frontend/.env` or Render Static Site env):
-- `VITE_API_BASE_URL=https://<your-backend-service>.onrender.com`
-- `VITE_GOOGLE_CLIENT_ID=<web_client_id>.apps.googleusercontent.com`
-- Do not wrap values in quotes.
-
-2. Backend env (Render Web Service env):
-- `GOOGLE_CLIENT_ID=<same web_client_id>`
-- Optional: `GOOGLE_CLIENT_IDS=<comma-separated list of accepted web client ids>`
-- `CORS_ORIGINS=https://<your-frontend-site>.onrender.com,http://localhost:5173`
-- `CORS_ORIGIN_REGEX=^https://.*\\.onrender\\.com$`
-
-3. Google Cloud Console OAuth client:
-- Authorized JavaScript origins must include your frontend URL, for example `https://<your-frontend-site>.onrender.com`.
-
-4. After changing env vars in Render, redeploy both backend and frontend services.
-
 ## 7. Features Included
 
-- Google login and JWT session
+- Phone login and JWT session
 - Multi-page app routes:
   - `/overview` (intro + news gallery)
   - `/prediction`

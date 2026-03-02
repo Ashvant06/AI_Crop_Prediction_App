@@ -65,6 +65,11 @@ a {
   font-family: "Baloo 2", "Segoe UI", sans-serif;
 }
 
+.phone-login-form {
+  display: grid;
+  gap: 10px;
+}
+
 .eyebrow {
   display: inline-flex;
   width: fit-content;
